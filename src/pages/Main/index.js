@@ -12,6 +12,7 @@ export default class Main extends Component {
     repositories: [],
     loading: false,
     err: false,
+    errorMessage: null,
   };
 
   //carregar os dados do localStorage
@@ -54,7 +55,9 @@ export default class Main extends Component {
         err: false,
       });
     } catch (error) {
-      this.setState({ loading: false, err: true });
+      this.setState({ err: true });
+    } finally {
+      this.setState({ loading: false });
     }
   };
 
@@ -66,7 +69,7 @@ export default class Main extends Component {
           <FaGithubAlt />
           Repositórios
         </h1>
-        <Form onSubmit={this.handleSubmit} error={this.state.err}>
+        <Form onSubmit={this.handleSubmit} error={err}>
           <input
             type="text"
             placeholder="Adicionar Repositório"
