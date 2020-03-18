@@ -3,7 +3,7 @@ import { FaGithubAlt, FaPlus, FaSpinner } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 import { Form, SubmitButton, List } from './styles';
 import Container from '../../components/Container';
-
+import ErrorMessage from '../../components/ErrorMessage';
 import api from '../../services/api';
 
 export default class Main extends Component {
@@ -11,6 +11,7 @@ export default class Main extends Component {
     newRepo: '',
     repositories: [],
     loading: false,
+    err: false,
   };
 
   //carregar os dados do localStorage
@@ -38,29 +39,34 @@ export default class Main extends Component {
 
     this.setState({ loading: true });
 
-    const { newRepo, repositories } = this.state;
-    const response = await api.get(`/repos/${newRepo}`);
+    try {
+      const { newRepo, repositories } = this.state;
+      const response = await api.get(`/repos/${newRepo}`);
 
-    const data = {
-      name: response.data.full_name,
-    };
+      const data = {
+        name: response.data.full_name,
+      };
 
-    this.setState({
-      repositories: [...repositories, data],
-      newRepo: '',
-      loading: false,
-    });
+      this.setState({
+        repositories: [...repositories, data],
+        newRepo: '',
+        loading: false,
+        err: false,
+      });
+    } catch (error) {
+      this.setState({ loading: false, err: true });
+    }
   };
 
   render() {
-    const { newRepo, repositories, loading } = this.state;
+    const { newRepo, repositories, loading, err } = this.state;
     return (
       <Container>
         <h1>
           <FaGithubAlt />
           Repositórios
         </h1>
-        <Form onSubmit={this.handleSubmit}>
+        <Form onSubmit={this.handleSubmit} error={this.state.err}>
           <input
             type="text"
             placeholder="Adicionar Repositório"
@@ -75,6 +81,7 @@ export default class Main extends Component {
             )}
           </SubmitButton>
         </Form>
+        {err ? <ErrorMessage>Repositório não encontrado!</ErrorMessage> : null}
         <List>
           {repositories.map(repository => (
             <li key={repository.name}>
